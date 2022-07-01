@@ -190,9 +190,9 @@ func queryHandlerOld(c *gin.Context, in *queryInOld) (*queryInOld, error) {
 }
 
 type bodyIn struct {
-	Param                  string `json:"param" validate:"required"`
-	ParamOptional          string `json:"param-optional"`
-	ValidatedParamOptional string `json:"param-optional-validated" validate:"eq=|eq=foo|gt=10"`
+	Param                  string `json:"param" form:"param" validate:"required"`
+	ParamOptional          string `json:"param-optional" form:"param-optional"`
+	ValidatedParamOptional string `json:"param-optional-validated" form:"param-optional-validated" validate:"eq=|eq=foo|gt=10"`
 }
 
 func bodyHandler(c *gin.Context, in *bodyIn) (*bodyIn, error) {
