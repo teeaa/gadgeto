@@ -78,7 +78,7 @@ You will probably want to customize the error hook, to produce finer grained err
 
 The role of this error hook is to inspect the returned error object and deduce the http specifics from it.
 We provide a ready-to-use error hook that depends on the juju/errors package (richer errors):
-    https://github.com/mcorbin/gadgeto/tree/master/tonic/utils/jujerr
+    https://github.com/loopfz/gadgeto/tree/master/tonic/utils/jujerr
 
 Example of the same application as before, using juju errors:
 
@@ -88,7 +88,7 @@ Example of the same application as before, using juju errors:
          "github.com/gin-gonic/gin"
          "github.com/juju/errors"
          "github.com/mcorbin/gadgeto/tonic"
-         "github.com/mcorbin/gadgeto/tonic/utils/jujerr"
+         "github.com/loopfz/gadgeto/tonic/utils/jujerr"
     )
 
     type GreetUserInput struct {
