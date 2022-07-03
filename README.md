@@ -1,5 +1,20 @@
 # Gadgeto!
 
+This is a fork of [loopfz/gadgeto](https://github.com/loopfz/gadgeto) which contain non-merged pull requests on this repository as well as enhancements.
+
+I would like to thank the original author for his amazing library. Tonic is really a game changer for me to write HTTP servers in Golang.
+
+List of changed compared to the original repository (you can also use `git log` to list changes, merged PR from the original repository contains a link to them):
+
+- Allow to retrieve bindHook errors: the original error returned by the bind hooks are now accessible.
+- Allows the SetRenderHook to override the mediaType
+- fix: make sure a validator exists to avoid panic
+- Add support for more content-type
+- Dependencies bump
+- Allow configuring the bind/render hooks and media type per route
+
+## Original README:
+
 Author:     Thomas Schaffer
 Language:   Golang
 License:    MIT

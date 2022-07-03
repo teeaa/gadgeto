@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/loopfz/gadgeto/iffy"
-	"github.com/loopfz/gadgeto/tonic"
+	"github.com/mcorbin/gadgeto/iffy"
+	"github.com/mcorbin/gadgeto/tonic"
 )
 
 func helloHandler(c *gin.Context) (interface{}, error) {
