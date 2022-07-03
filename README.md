@@ -13,7 +13,7 @@ List of changed compared to the original repository (you can also use `git log` 
 - Dependencies bump
 - Allow configuring the bind/render hooks and media type per route
 
-## Original README:
+## README:
 
 Author:     Thomas Schaffer
 Language:   Golang
