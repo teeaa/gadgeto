@@ -100,11 +100,11 @@ func DefaultBindingHookMaxBodyBytes(maxBodyBytes int64) BindHook {
 		ct := c.Request.Header["Content-Type"]
 		var b binding.Binding = binding.JSON
 
-		if len(ct) == 1 && ct[0] == binding.MIMEPOSTForm {
+		if len(ct) == 1 && strings.HasPrefix(ct[0], binding.MIMEPOSTForm) {
 			b = binding.Form
-		} else if len(ct) == 1 && ct[0] == binding.MIMEMultipartPOSTForm {
+		} else if len(ct) == 1 && strings.HasPrefix(ct[0], binding.MIMEMultipartPOSTForm) {
 			b = binding.FormMultipart
-		} else if len(ct) == 1 && ct[0] == binding.MIMEXML {
+		} else if len(ct) == 1 && strings.HasPrefix(ct[0], binding.MIMEXML) {
 			b = binding.XML
 		}
 
