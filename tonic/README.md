@@ -43,7 +43,7 @@ Here is a basic application that greets a user on http://localhost:8080/hello/me
          "fmt"
 
          "github.com/gin-gonic/gin"
-         "github.com/mcorbin/gadgeto/tonic"
+         "github.com/teeaa/gadgeto/tonic"
     )
 
     type GreetUserInput struct {
@@ -87,7 +87,7 @@ Example of the same application as before, using juju errors:
 
          "github.com/gin-gonic/gin"
          "github.com/juju/errors"
-         "github.com/mcorbin/gadgeto/tonic"
+         "github.com/teeaa/gadgeto/tonic"
          "github.com/loopfz/gadgeto/tonic/utils/jujerr"
     )
 

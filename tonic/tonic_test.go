@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mcorbin/gadgeto/iffy"
-	"github.com/mcorbin/gadgeto/tonic"
+	"github.com/teeaa/gadgeto/iffy"
+	"github.com/teeaa/gadgeto/tonic"
 )
 
 var r http.Handler
