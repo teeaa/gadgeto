@@ -1,6 +1,7 @@
 package tonic
 
 import (
+	"bytes"
 	"encoding"
 	"errors"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	validator "github.com/go-playground/validator/v10"
+	"sigs.k8s.io/yaml" // sigs.k8s.io/yaml is the alternative to the unmaintained lib github.com/ghodss/yaml. cf https://github.com/ghodss/yaml/issues/80
 )
 
 // DefaultMaxBodyBytes is the maximum allowed size of a request body in bytes.
@@ -38,6 +40,7 @@ const (
 	tonicWantRouteInfos = "_tonic_want_route_infos"
 )
 
+// nolint
 var (
 	errorHook  ErrorHook  = DefaultErrorHook
 	bindHook   BindHook   = DefaultBindingHook
@@ -87,7 +90,7 @@ func DefaultErrorHook(c *gin.Context, e error) (int, interface{}) {
 // It uses Gin JSON binding to bind the body parameters of the request
 // to the input object of the handler.
 // Ir teturns an error if Gin binding fails.
-var DefaultBindingHook BindHook = DefaultBindingHookMaxBodyBytes(DefaultMaxBodyBytes)
+var DefaultBindingHook BindHook = DefaultBindingHookMaxBodyBytes(DefaultMaxBodyBytes) // nolint
 
 // DefaultBindingHookMaxBodyBytes returns a BindHook with the default logic, with configurable MaxBodyBytes.
 func DefaultBindingHookMaxBodyBytes(maxBodyBytes int64) BindHook {
@@ -96,7 +99,7 @@ func DefaultBindingHookMaxBodyBytes(maxBodyBytes int64) BindHook {
 		if c.Request.ContentLength == 0 || c.Request.Method == http.MethodGet {
 			return nil
 		}
-
+		////////////////////
 		ct := c.Request.Header["Content-Type"]
 		var b binding.Binding = binding.JSON
 
@@ -111,6 +114,17 @@ func DefaultBindingHookMaxBodyBytes(maxBodyBytes int64) BindHook {
 		if err := c.ShouldBindWith(i, b); err != nil && err != io.EOF {
 			return fmt.Errorf("error parsing request body: %s", err.Error())
 		}
+		switch c.Request.Header.Get("Content-Type") {
+		case "text/x-yaml", "text/yaml", "text/yml", "application/x-yaml", "application/x-yml", "application/yaml", "application/yml":
+			if err := c.ShouldBindWith(i, yamlBinding{}); err != nil && err != io.EOF {
+				return fmt.Errorf("error parsing request body: %s", err.Error())
+			}
+		default:
+			if err := c.ShouldBindWith(i, binding.JSON); err != nil && err != io.EOF {
+				return fmt.Errorf("error parsing request body: %s", err.Error())
+			}
+		}
+		////////////////////
 		return nil
 	}
 }
@@ -460,4 +474,34 @@ func bindStringValue(s string, v reflect.Value) error {
 		return fmt.Errorf("unsupported parameter type: %v", v.Kind())
 	}
 	return nil
+}
+
+// yamlBinding is an implementation of gin's binding.Binding
+// we don't use official gin's yamlBinding because we prefer to use github.com/ghodss/yaml
+type yamlBinding struct{}
+
+func (yamlBinding) Name() string {
+	return "yaml"
+}
+
+func (yamlBinding) Bind(req *http.Request, obj interface{}) error {
+	return decodeYAML(req.Body, obj)
+}
+
+func (yamlBinding) BindBody(body []byte, obj interface{}) error {
+	return decodeYAML(bytes.NewReader(body), obj)
+}
+
+func decodeYAML(r io.Reader, obj interface{}) error {
+	btes, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+	if err := yaml.Unmarshal(btes, &obj); err != nil {
+		return err
+	}
+	if binding.Validator == nil {
+		return nil
+	}
+	return binding.Validator.ValidateStruct(obj)
 }

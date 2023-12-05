@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// nolint
 var defaultOpts = []ListenOptFunc{
 	ListenAddr(":8080"),
 	CatchSignals(os.Interrupt, syscall.SIGTERM),
@@ -24,7 +25,10 @@ func ListenAndServe(handler http.Handler, errorHandler func(error), opt ...Liste
 	listener := struct {
 		net.Listener
 	}{}
-	srv := &http.Server{Handler: handler}
+	srv := &http.Server{
+		Handler:           handler,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
 
 	listenOpt := &ListenOpt{Listener: &listener, Server: srv}
 
