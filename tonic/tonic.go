@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -90,7 +91,11 @@ func DefaultErrorHook(c *gin.Context, e error) (int, interface{}) {
 // It uses Gin JSON binding to bind the body parameters of the request
 // to the input object of the handler.
 // Ir teturns an error if Gin binding fails.
-var DefaultBindingHook BindHook = DefaultBindingHookMaxBodyBytes(DefaultMaxBodyBytes) // nolint
+// nolint
+var (
+	DefaultBindingHook BindHook = DefaultBindingHookMaxBodyBytes(DefaultMaxBodyBytes)
+	yamlTypes                   = []string{"text/x-yaml", "text/yaml", "text/yml", "application/x-yaml", "application/x-yml", "application/yaml", "application/yml"}
+)
 
 // DefaultBindingHookMaxBodyBytes returns a BindHook with the default logic, with configurable MaxBodyBytes.
 func DefaultBindingHookMaxBodyBytes(maxBodyBytes int64) BindHook {
@@ -99,32 +104,24 @@ func DefaultBindingHookMaxBodyBytes(maxBodyBytes int64) BindHook {
 		if c.Request.ContentLength == 0 || c.Request.Method == http.MethodGet {
 			return nil
 		}
-		////////////////////
-		ct := c.Request.Header["Content-Type"]
+
+		ct := c.ContentType()
 		var b binding.Binding = binding.JSON
 
-		if len(ct) == 1 && ct[0] == binding.MIMEPOSTForm {
+		if strings.HasPrefix(ct, binding.MIMEPOSTForm) {
 			b = binding.Form
-		} else if len(ct) == 1 && ct[0] == binding.MIMEMultipartPOSTForm {
+		} else if strings.HasPrefix(ct, binding.MIMEMultipartPOSTForm) {
 			b = binding.FormMultipart
-		} else if len(ct) == 1 && ct[0] == binding.MIMEXML {
+		} else if strings.HasPrefix(ct, binding.MIMEXML) {
 			b = binding.XML
+		} else if slices.ContainsFunc(yamlTypes, func(s string) bool { return strings.HasPrefix(ct, s) }) {
+			b = yamlBinding{}
 		}
 
 		if err := c.ShouldBindWith(i, b); err != nil && err != io.EOF {
 			return fmt.Errorf("error parsing request body: %s", err.Error())
 		}
-		switch c.Request.Header.Get("Content-Type") {
-		case "text/x-yaml", "text/yaml", "text/yml", "application/x-yaml", "application/x-yml", "application/yaml", "application/yml":
-			if err := c.ShouldBindWith(i, yamlBinding{}); err != nil && err != io.EOF {
-				return fmt.Errorf("error parsing request body: %s", err.Error())
-			}
-		default:
-			if err := c.ShouldBindWith(i, binding.JSON); err != nil && err != io.EOF {
-				return fmt.Errorf("error parsing request body: %s", err.Error())
-			}
-		}
-		////////////////////
+
 		return nil
 	}
 }
